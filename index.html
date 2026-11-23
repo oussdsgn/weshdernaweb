@@ -70,6 +70,38 @@
     .cta { width: 100%; }
     .cta a { flex: 1; text-align: center; padding: 4px 8px; font-size: 14px; }
   }
+
+  /* Algiers at night behind the hero, darkened so the text stays readable */
+  .page { isolation: isolate; }
+  .page::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(1,1,1,.6) 0%, rgba(1,1,1,.4) 35%, rgba(1,1,1,.82) 62%, rgba(1,1,1,.9) 85%, #010101 100%), url(assets/algiers-night.webp) center 40% / cover no-repeat; }
+  .glow { opacity: .7; }
+  .sub { color: #a8a8a8; }
+
+  section.more { max-width: 1120px; margin: 0 auto; padding: 72px 32px 0; }
+  section.more:last-of-type { padding-bottom: 96px; }
+  h2 { margin: 0 0 6px; font-size: 28px; font-weight: 500; letter-spacing: -0.02em; }
+  .lede { margin: 0 0 24px; color: #8a8a8a; }
+
+  .row { display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 12px; scrollbar-width: thin; scrollbar-color: #2a2a2a transparent; }
+  .card { flex: 0 0 208px; scroll-snap-align: start; }
+  .poster { position: relative; aspect-ratio: 3 / 4; border-radius: 18px; overflow: hidden; background: #0e0e0e; border: 1px solid #1c1c1c; }
+  .poster img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: block; transition: transform .3s; }
+  .poster .blur { object-fit: cover; filter: blur(18px) brightness(.45); transform: scale(1.2); }
+  .card:hover .poster img:not(.blur) { transform: scale(1.03); }
+  .when { margin-top: 12px; font-size: 14px; color: #5b9cff; }
+  .title { margin-top: 2px; font-weight: 500; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .where { margin-top: 4px; font-size: 14px; color: #8a8a8a; }
+
+  .cities { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+  .city { padding: 22px; border-radius: 20px; border: 1px solid #1c1c1c; background: linear-gradient(160deg, #0c1526, #050505 70%); transition: border-color .2s; display: flex; flex-direction: column; gap: 18px; }
+  .city:hover { border-color: #2c4f86; }
+  .names { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .en { font-size: 22px; font-weight: 500; }
+  .ar { font-size: 18px; color: #8a8a8a; }
+  .counts { display: flex; flex-direction: column; gap: 2px; font-size: 14px; color: #8a8a8a; }
+  .counts b { color: #fff; font-weight: 500; }
+  @media (max-width: 600px) { section.more { padding: 56px 20px 0; } .card { flex-basis: 168px; } h2 { font-size: 24px; } .cities { grid-template-columns: 1fr 1fr; gap: 10px; } .city { padding: 16px; gap: 14px; } .names { flex-direction: column; gap: 0; } .en { font-size: 19px; } .ar { font-size: 15px; } }
+  [hidden] { display: none !important; }
 </style>
 </head>
 <body>
@@ -97,5 +129,111 @@
   </div>
 
 </main>
+  <section class="more" id="week" aria-labelledby="wk" hidden>
+    <h2 id="wk">This week</h2>
+    <p class="lede">What's on across Algeria in the next seven days.</p>
+    <div class="row"></div>
+  </section>
+  <section class="more" id="where" aria-labelledby="ct" hidden>
+    <h2 id="ct">Your cities</h2>
+    <p class="lede">Where the app has events and places today.</p>
+    <div class="cities"></div>
+  </section>
+<script src="https://wesh-kayen.web.app/app/dates.js"></script>
+<script>
+// This week's events and the cities, read live from the app's public catalog (same rules as the app:
+// only approved items). If anything fails, both sections stay hidden.
+(async () => {
+  const D = window.WeshDates;
+  if (!D) return;
+  const APP = "https://wesh-kayen.web.app/app/";
+  const BASE = "https://firestore.googleapis.com/v1/projects/wesh-kayen/databases/(default)/documents/";
+  const val = (v) => !v ? null : "stringValue" in v ? v.stringValue : "integerValue" in v ? +v.integerValue
+    : "doubleValue" in v ? v.doubleValue : "booleanValue" in v ? v.booleanValue : "timestampValue" in v ? v.timestampValue : null;
+  async function all(col, fields) {
+    const mask = fields.map((f) => "&mask.fieldPaths=" + f).join("");
+    let out = [], tok = "";
+    do {
+      const r = await fetch(BASE + col + "?pageSize=300" + mask + (tok ? "&pageToken=" + tok : ""));
+      if (!r.ok) throw new Error(col + " " + r.status);
+      const j = await r.json();
+      for (const d of j.documents || []) {
+        const o = { id: d.name.split("/").pop() };
+        for (const [k, v] of Object.entries(d.fields || {})) o[k] = val(v);
+        out.push(o);
+      }
+      tok = j.nextPageToken || "";
+    } while (tok);
+    return out;
+  }
+  const approved = (d) => String(d.status || "approved").toLowerCase() === "approved";
+  const safeUrl = (u) => /^https?:\/\//i.test(u || "") ? u : "";
+  // Same guess as the web app when an event has no city
+  const cityOf = (d) => {
+    const raw = String(d.city || "").trim().toLowerCase();
+    if (raw) return raw;
+    const hay = (d.locationName || "") + " " + (d.areaName || "") + " " + (d.title || "") + " " + d.id;
+    for (const c of ["oran", "constantine", "annaba"]) if (hay.toLowerCase().includes(c)) return c;
+    return "algiers";
+  };
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+
+  try {
+    const [events, places, cities] = await Promise.all([
+      all("events", ["status", "title", "name", "dateStr", "endDate", "city", "locationName", "areaName", "photoUrl"]),
+      all("discoveryHub", ["status", "city"]),
+      all("cities", ["name", "arabicName"]),
+    ]);
+    const t = D.today();
+    const live = events.filter(approved).map((d) => ({ ...d, title: d.title || d.name || "", dateStr: D.withEndDate(d.dateStr || "", d.endDate), city: cityOf(d) }))
+      .filter((e) => e.title && !D.isOver(e, t));
+    const placeList = places.filter(approved).map((d) => String(d.city || "algiers").toLowerCase());
+    const cityName = (id) => { const c = cities.find((x) => x.id === id); return c && c.name ? c.name.replace(/\s*\(.*$/, "") : id.charAt(0).toUpperCase() + id.slice(1); };
+
+    // Soonest first; ongoing and repeating events after the one-offs of the same day
+    const week = live.map((e) => {
+      const first = [0, 1, 2, 3, 4, 5, 6].findIndex((i) => D.occursOn(e, D.plusDays(t, i)));
+      const label = D.label(e, "en", t);
+      return { e, label, sort: first * 10 + (/^(Every|Until|Daily)/.test(label) ? 5 : 0), first };
+    }).filter((x) => x.first >= 0).sort((a, b) => a.sort - b.sort);
+
+    if (week.length) {
+      const row = document.querySelector("#week .row");
+      for (const { e, label } of week) {
+        const a = el("a", "card"); a.href = APP;
+        const p = el("div", "poster"); const src = safeUrl(e.photoUrl);
+        if (src) for (const cls of ["blur", ""]) { const i = el("img", cls); i.src = src; i.alt = ""; i.loading = "lazy"; i.referrerPolicy = "no-referrer"; i.onerror = () => i.remove(); p.append(i); }
+        a.append(p, el("div", "when", label), el("div", "title", e.title), el("div", "where", cityName(e.city)));
+        row.append(a);
+      }
+      document.getElementById("week").hidden = false;
+    }
+
+    const tiles = cities.map((c) => ({
+      name: (c.name || c.id).replace(/\s*\(.*$/, ""),
+      ar: /[a-z]/i.test(c.arabicName || "") ? "" : (c.arabicName || ""),
+      events: live.filter((e) => e.city === c.id).length,
+      places: placeList.filter((p) => p === c.id).length,
+    })).filter((c) => c.events + c.places > 0).sort((a, b) => b.events + b.places - (a.events + a.places));
+    if (tiles.length) {
+      const grid = document.querySelector("#where .cities");
+      for (const c of tiles) {
+        const a = el("a", "city"); a.href = APP;
+        const names = el("div", "names"); names.append(el("span", "en", c.name));
+        if (c.ar) { const ar = el("span", "ar", c.ar); ar.lang = "ar"; names.append(ar); }
+        const counts = el("div", "counts");
+        const line = (n, word) => { const s = el("span"); s.append(el("b", null, String(n)), " " + word + (n > 1 ? "s" : "")); counts.append(s); };
+        if (c.events) line(c.events, "upcoming event");
+        if (c.places) line(c.places, "place");
+        a.append(names, counts);
+        grid.append(a);
+      }
+      document.getElementById("where").hidden = false;
+    }
+  } catch (err) {
+    console.warn("Live sections not loaded:", err);
+  }
+})();
+</script>
 </body>
 </html>
