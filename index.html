@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wesh Derna? · Events and places in Algerian cities</title>
+<meta name="description" content="Events and places in Algerian cities. Free on Android and in your browser.">
+<meta name="theme-color" content="#010101">
+<link rel="icon" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500&display=swap">
+<style>
+  :root { --bg: #010101; --text: #fff; --muted: #4f4f4f; --accent: #196fd6; --glow: #a6741e; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: "Google Sans Flex", "Google Sans", system-ui, sans-serif;
+    font-size: 16px; line-height: 1.6; letter-spacing: -0.01em;
+    -webkit-font-smoothing: antialiased; overflow-x: hidden;
+  }
+  a { color: inherit; text-decoration: none; }
+
+  .page { position: relative; min-height: 100vh; min-height: 100svh; padding: 0 32px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+  /* The amber light behind the phone */
+  .glow { position: absolute; inset: 0; filter: blur(112px); pointer-events: none; overflow: hidden; }
+  .glow::before { content: ""; position: absolute; left: 55%; top: 33%; width: 40%; height: 40%; transform: translate(-50%, -50%); border-radius: 9999px; background: var(--glow); }
+
+  .logo { position: absolute; top: 33px; left: 31px; font-weight: 500; line-height: 20px; z-index: 2; }
+
+  /* The phone fades out into the headline */
+  .phone { position: relative; width: 100%; height: 320px; overflow: hidden; -webkit-mask-image: linear-gradient(#000 67.5%, transparent); mask-image: linear-gradient(#000 67.5%, transparent); }
+  .phone .frame, .phone .screen { position: absolute; left: 50%; transform: translateX(-50%); }
+  .phone .frame { top: 0; width: 347px; height: 669px; object-fit: contain; }
+  .phone .screen { top: 19px; width: 291px; height: 630px; object-fit: cover; border-radius: 36px; }
+
+  .copy { position: relative; width: 100%; text-align: center; }
+  h1 { margin: 0; font-size: 36px; font-weight: 500; line-height: 1.2; letter-spacing: -0.02em; text-wrap: balance; }
+  .sub { margin: 12px 0 0; color: var(--muted); }
+
+  /* The pill that held the waitlist form now holds the two ways in */
+  .cta { margin: 32px auto 0; width: fit-content; max-width: 100%; display: flex; align-items: center; gap: 6px; padding: 6px; border-radius: 100px; background: var(--bg); border: 1px solid #1c1c1c; backdrop-filter: blur(3px); }
+  .cta a { padding: 4px 16px; border-radius: 100px; line-height: 25.6px; white-space: nowrap; }
+  .cta .web { color: #9a9a9a; transition: color .2s; }
+  .cta .web:hover { color: var(--text); }
+  .cta .android { background: var(--accent); color: #fff; transition: filter .2s; }
+  .cta .android:hover { filter: brightness(1.1); }
+  .cta a:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+
+  footer { position: absolute; left: 24px; right: 24px; bottom: 6px; display: flex; gap: 24px; font-size: 12px; line-height: 19.2px; color: var(--muted); z-index: 2; }
+  footer .contact { margin-left: auto; }
+  footer a:hover { color: var(--text); }
+
+  /* One entrance on load, like the template */
+  .phone, .copy { animation: rise .9s cubic-bezier(.2, .7, .2, 1) both; }
+  .copy { animation-delay: .15s; }
+  @keyframes rise { from { opacity: 0; transform: translateY(24px); filter: blur(8px); } }
+  @media (prefers-reduced-motion: reduce) { .phone, .copy { animation: none; } }
+
+  @media (max-width: 600px) {
+    .page { padding: 0 20px; }
+    h1 { font-size: 34px; }
+    .sub { text-wrap: balance; }
+    .cta { width: 100%; }
+    .cta a { flex: 1; text-align: center; padding: 4px 8px; font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+<main class="page">
+  <div class="glow" aria-hidden="true"></div>
+  <a class="logo" href="/">Wesh Kayen</a>
+
+  <div class="phone" aria-hidden="true">
+    <!-- Screen over the frame, so the frame's camera notch doesn't cover the picture -->
+    <img class="frame" src="assets/phone-frame.png" alt="">
+    <img class="screen" src="assets/phone-screen.jpg" alt="">
+  </div>
+
+  <div class="copy">
+    <h1>Makach plan? Derna plan.</h1>
+    <p class="sub">Events and places in Algerian cities. Free on Android and in your browser.</p>
+    <nav class="cta" aria-label="Get the app">
+      <a class="web" href="https://wesh-kayen.web.app/app/">Open the web app</a>
+      <a class="android" href="https://wesh-kayen.web.app/update">Download for Android</a>
+    </nav>
+  </div>
+
+  <footer>
+    <a href="#">Instagram</a>
+    <a href="#">X / Twitter</a>
+    <a href="#">LinkedIn</a>
+    <a class="contact" href="mailto:oussamaaba1@outlook.com">Contact</a>
+  </footer>
+</main>
+</body>
+</html>
