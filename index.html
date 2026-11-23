@@ -28,7 +28,8 @@
   .glow { position: absolute; inset: 0; filter: blur(112px); pointer-events: none; overflow: hidden; }
   .glow::before { content: ""; position: absolute; left: 55%; top: 33%; width: 40%; height: 40%; transform: translate(-50%, -50%); border-radius: 9999px; background: var(--glow); }
 
-  .logo { position: absolute; top: 33px; left: 31px; font-weight: 500; line-height: 20px; z-index: 2; }
+  .logo { position: absolute; top: 30px; left: 50%; transform: translateX(-50%); z-index: 2; line-height: 0; }
+  .logo img { height: 24px; width: auto; display: block; }
 
   /* The phone fades out into the headline */
   .phone { position: relative; width: 100%; height: 320px; overflow: hidden; -webkit-mask-image: linear-gradient(#000 67.5%, transparent); mask-image: linear-gradient(#000 67.5%, transparent); }
@@ -71,7 +72,7 @@
 <body>
 <main class="page">
   <div class="glow" aria-hidden="true"></div>
-  <a class="logo" href="/">Wesh Kayen</a>
+  <a class="logo" href="/" aria-label="Wesh Derna?"><img src="assets/logo.svg" alt="Wesh Derna?" width="138" height="24"></a>
 
   <div class="phone" aria-hidden="true">
     <!-- Screen over the frame, so the frame's camera notch doesn't cover the picture -->
