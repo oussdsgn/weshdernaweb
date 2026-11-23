@@ -94,15 +94,19 @@
   .title { margin-top: 2px; font-weight: 500; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .where { margin-top: 4px; font-size: 14px; color: #8a8a8a; }
 
-  .cities { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
-  .city { padding: 22px; border-radius: 20px; border: 1px solid #1c1c1c; background: linear-gradient(160deg, #0c1526, #050505 70%); transition: border-color .2s; display: flex; flex-direction: column; gap: 18px; }
+  .cities { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+  .city { border-radius: 20px; border: 1px solid #1c1c1c; background: linear-gradient(160deg, #0c1526, #050505 70%); transition: border-color .2s; overflow: hidden; display: flex; flex-direction: column; }
+  .city .pic { aspect-ratio: 3 / 2; background: #0e0e0e; overflow: hidden; }
+  .city .pic img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s; }
+  .city:hover .pic img { transform: scale(1.04); }
+  .city .body { padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 14px; }
   .city:hover { border-color: #2c4f86; }
-  .names { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .names { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; column-gap: 12px; }
   .en { font-size: 22px; font-weight: 500; }
   .ar { font-size: 18px; color: #8a8a8a; }
   .counts { display: flex; flex-direction: column; gap: 2px; font-size: 14px; color: #8a8a8a; }
   .counts b { color: #fff; font-weight: 500; }
-  @media (max-width: 600px) { section.more { padding: 56px 20px 0; } .card { flex-basis: 168px; } h2 { font-size: 32px; } .cities { grid-template-columns: 1fr 1fr; gap: 10px; } .city { padding: 16px; gap: 14px; } .names { flex-direction: column; gap: 0; } .en { font-size: 19px; } .ar { font-size: 15px; } }
+  @media (max-width: 600px) { section.more { padding: 56px 20px 0; } .card { flex-basis: 168px; } h2 { font-size: 32px; } .cities { grid-template-columns: 1fr 1fr; gap: 10px; } .city .body { padding: 14px; gap: 10px; } .names { flex-direction: column; gap: 0; } .en { font-size: 19px; } .ar { font-size: 15px; } }
   [hidden] { display: none !important; }
 </style>
 </head>
@@ -137,7 +141,7 @@
     <div class="row"></div>
   </section>
   <section class="more" id="where" aria-labelledby="ct" hidden>
-    <h2 id="ct">Your cities</h2>
+    <h2 id="ct">Available in</h2>
     <p class="lede">Where the app has events and places today.</p>
     <div class="cities"></div>
   </section>
@@ -211,7 +215,9 @@
       document.getElementById("week").hidden = false;
     }
 
+    const PHOTOS = ["algiers", "oran", "annaba", "tlemcen", "constantine"];
     const tiles = cities.map((c) => ({
+      id: c.id,
       name: (c.name || c.id).replace(/\s*\(.*$/, ""),
       ar: /[a-z]/i.test(c.arabicName || "") ? "" : (c.arabicName || ""),
       events: live.filter((e) => e.city === c.id).length,
@@ -227,7 +233,9 @@
         const line = (n, word) => { const s = el("span"); s.append(el("b", null, String(n)), " " + word + (n > 1 ? "s" : "")); counts.append(s); };
         if (c.events) line(c.events, "upcoming event");
         if (c.places) line(c.places, "place");
-        a.append(names, counts);
+        const body = el("div", "body"); body.append(names, counts);
+        if (PHOTOS.includes(c.id)) { const pic = el("div", "pic"), img = el("img"); img.src = "assets/cities/" + c.id + ".webp"; img.alt = ""; img.loading = "lazy"; pic.append(img); a.append(pic); }
+        a.append(body);
         grid.append(a);
       }
       document.getElementById("where").hidden = false;
