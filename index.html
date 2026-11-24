@@ -33,9 +33,18 @@
 
   /* The phone fades out into the headline */
   .phone { position: relative; width: 100%; height: 320px; overflow: hidden; -webkit-mask-image: linear-gradient(#000 67.5%, transparent); mask-image: linear-gradient(#000 67.5%, transparent); }
-  .phone .frame, .phone .screen { position: absolute; left: 50%; transform: translateX(-50%); }
-  .phone .frame { top: 0; width: 347px; height: 669px; object-fit: contain; }
-  .phone .screen { top: 19px; width: 291px; height: 630px; object-fit: cover; border-radius: 36px; }
+  /* Three phones: the logo in front, real app screens tilted behind it on each side */
+  .device { position: absolute; top: 0; left: 50%; width: 347px; height: 669px; transform: translateX(-50%); }
+  .device .frame { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+  .device .screen { position: absolute; top: 19px; left: 28px; width: 291px; height: 630px; object-fit: cover; object-position: top; border-radius: 36px; }
+  .device.main { z-index: 2; }
+  .device.side { top: 56px; filter: brightness(.72); }
+  .device.left { transform: translateX(calc(-50% - 270px)) rotate(-7deg) scale(.86); }
+  .device.right { transform: translateX(calc(-50% + 270px)) rotate(7deg) scale(.86); }
+  @media (max-width: 600px) {
+    .device.left { transform: translateX(calc(-50% - 190px)) rotate(-7deg) scale(.8); }
+    .device.right { transform: translateX(calc(-50% + 190px)) rotate(7deg) scale(.8); }
+  }
 
   .copy { position: relative; width: 100%; text-align: center; }
   h1, h2 { font-family: "Anton", Impact, sans-serif; font-weight: 400; letter-spacing: 0.01em; }
@@ -116,8 +125,18 @@
 
   <div class="phone" aria-hidden="true">
     <!-- Screen over the frame, so the frame's camera notch doesn't cover the picture -->
-    <img class="frame" src="assets/phone-frame.png" alt="">
-    <img class="screen" src="assets/phone-screen.jpg" alt="">
+    <div class="device side left">
+      <img class="frame" src="assets/phone-frame.png" alt="">
+      <img class="screen" src="assets/screen-home.jpg" alt="">
+    </div>
+    <div class="device side right">
+      <img class="frame" src="assets/phone-frame.png" alt="">
+      <img class="screen" src="assets/screen-event.jpg" alt="">
+    </div>
+    <div class="device main">
+      <img class="frame" src="assets/phone-frame.png" alt="">
+      <img class="screen" src="assets/phone-screen.jpg" alt="">
+    </div>
   </div>
 
   <div class="copy">
